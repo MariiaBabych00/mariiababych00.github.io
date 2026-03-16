@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vision Board</title>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0px;
+}
+
+.feld {
+    border: 1px solid #3a2f2f;
+    padding: 20px;
+    text-align:center;
+    cursor:pointer;
+    min-height: 240px;
+    border-radius: 16px;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+}
+
+.titel {
+    font-weight: bold;
+    font-size: 22px;
+    color: #2b1f14;
+}
+
+.beschreibung {
+    display: none;
+    margin-top: 8px;
+    font-size: 14px;
+    color: #4a3a2a;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.titel:hover + .beschreibung {
+    display: block;
+    opacity: 1;
+}
+
+.bilder {
+  position: relative;
+  min-height: 220px;
+  margin-top: 12px;
+}
+
+.bilder img {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: grab;
+  z-index: 10;
+}
+
+.bild-box {
+    position: absolute;
+    display: inline-block;
+}
+
+.bild-box img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: grab;
+}
+
+.resize-handle {
+    position: absolute;
+    right: -6px;
+    bottom: -6px;
+    width: 12px;
+    height: 12px;
+    background: white;
+    border: 1px solid #444;
+    border-radius: 50%;
+    cursor: nwse-resize;
+}
+
+.bild-box:hover .resize-handle {
+    display: block;
+}
+
+.save-view .resize-handle {
+    display: none;
+}
+
+.save-view .titel,
+.save-view .beschreibung,
+.save-view input[type="file"] {
+  display: none;
+}
+
+select,
+button {
+  margin: 12px 0 12px 12px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: none;
+  background-color: #6b5a40;
+  color: white;
+  font-size: 14px;
+}
+
+select {
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.toolbar {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    flex-wrap: wrap;
+}
+
+.info-btn,
+input[type="file"] {
+    margin-top: 6px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: white;
+    color: #333;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.info-btn:hover,
+input[type="file"]:hover {
+    background: #333;
+    color: white;
+}
+
+.reichtum {
+  background-color: #c96dd8;
+}
+
+.ruhm {
+  background-color: #ff2b2b;
+}
+
+.liebe {
+  background-color: #f3a6b3;
+}
+
+.familie {
+  background-color: #1fa21f;
+}
+
+.gesundheit {
+  background-color: #ffe600;
+}
+
+.kreativität {
+  background-color: #f2f2f2;
+}
+
+.wissen {
+  background-color: #d8c9a3;
+}
+
+.karriere {
+  background-color: #7fa7b5;
+}
+
+.reisen {
+  background-color: #d9d9d9;
+}
+
+    </style>
+</head>
+<body>
+    <button id="saveBtn" onclick="toggleSaveView()">Vision Board anzeigen</button>
+    <button onclick="downloadBoard()">Vision Board herunterladen</button>
+    
+    <select onchange="wechselBackground(this.value)">
+        <option value="minimal">Minimal</option>
+        <option value="nature">Natur</option>
+        <option value="leaf">Blätter</option>
+      </select>
+
+    <div class="board">
+        <div class="feld reichtum">
+
+            <div class="titel">Reichtum / Wohlstand</div>
+            
+            <p class="beschreibung">
+            Hier kannst du Fotos hinzufügen, die Geld, finanzielle Ziele oder materielle Wünsche symbolisieren.
+            </p>
+            
+            <input type="file" accept="image/*" multiple onchange="bildHochladen(event)" onclick="event.stopPropagation()">
+            
+            <div class="bilder"></div>
+            
+            </div>
+
+            <div class="feld ruhm">
+
+                <div class="titel">Ruhm / Anerkennung</div>
+
+            <p class="beschreibung">
+                Hier passen Bilder zu Erfolg, Anerkennung und Selbstvertrauen.
+            </p>
+            <input type="file" accept="image/*" multiple onchange="bildHochladen(event)" onclick="event.stopPropagation()">
+            
+            <div class="bilder"></div>
+        </div>
+
+        <div class="feld liebe">
+
+            <div class="titel">Liebe / Partnerschaft</div>
+
+            <p class="beschreibung">
+                Hier kannst du Fotos zu Liebe, Beziehung oder Ehe hinzufügen.
+            </p>
+            <input type="file" accept="image/*" multiple onchange="bildHochladen(event)" onclick="event.stopPropagation()">
+            
+            <div class="bilder"></div>
+        </div>
+
+        <div class="feld familie">
+
+            <div class="titel">Familie / Wurzeln</div>
+
+        <p class="beschreibung">
+            Hier passen Bilder zu Familie, Zuhause und Stabilität.
+        </p>
+        <input type="file" accept="image/*" multiple onchange="bildHochladen(event)" onclick="event.stopPropagation()">
+            
+            <div class="bilder"></div>
+    </div>
+
+    <div class="feld gesundheit">
+
+        <div class="titel">Gesundheit / Ich selbst</div>
+
+        <p class="beschreibung">
+            Hier kannst du dein Foto oder Bilder für Gesundheit und Balance einfügen.
+        </p>
+        <input type="file" accept="image/*" multiple onchange="bildHochladen(event)" onclick="event.stopPropagation()">
+            
+            <div class="bilder"></div>
+    </div>
+
+    <div class="feld kreativität">
+
+        <div class="titel">Kreativität / Kinder</div>
+
+        <p class="beschreibung">
+            Hier passen kreative Ideen, Hobbys und Freude hinein.
+        </p>
+        <input type="file" accept="image/*" multiple onchange="bildHochladen(event)" onclick="event.stopPropagation()">
+            
+            <div class="bilder"></div>
+    </div>
+
+    <div class="feld wissen">
+
+        <div class="titel">Wissen / Bildung / Lernen</div>
+
+        <p class="beschreibung">
+            Hier kannst du Fotos zu Lernen, Büchern und neuen Fähigkeiten hinzufügen.
+        </p>
+        <input type="file" accept="image/*" multiple onchange="bildHochladen(event)" onclick="event.stopPropagation()">
+            
+            <div class="bilder"></div>
+    </div>
+
+    <div class="feld karriere">
+
+        <div class="titel">Karriere / Lebensweg</div>
+
+        <p class="beschreibung">
+            Hier passen Bilder zu Beruf, Karriere und deinen Zielen.
+        </p>
+        <input type="file" accept="image/*" multiple onchange="bildHochladen(event)" onclick="event.stopPropagation()">
+            
+            <div class="bilder"></div>
+    </div>
+
+    <div class="feld reisen">
+
+        <div class="titel">Reisen / Unterstützung</div>
+
+        <p class="beschreibung">
+                Hier kannst du Reiseziele oder hilfreiche Menschen symbolisch darstellen.
+            </p>
+            <input type="file" accept="image/*" multiple onchange="bildHochladen(event)" onclick="event.stopPropagation()">
+            
+            <div class="bilder"></div>
+    </div>
+      </div>
+       <script>
+        function zeigeText(element) {
+        if (wirdGeradeGezogen) return;
+        element.classList.toggle("aktiv");
+        }
+        
+        function bildHochladen(event) {
+            const files = event.target.files;
+            if (!files.length) return;
+        
+            const feld = event.target.closest(".feld");
+            const bilderBereich = feld.querySelector(".bilder");
+        
+            const vorhandeneBilder = bilderBereich.querySelectorAll("img").length;
+        
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+        
+                reader.onload = function(e) {
+                    const box = document.createElement("div");
+                    box.className = "bild-box";
+                    box.style.left = "20px";
+                    box.style.top = "20px";
+                    box.style.width = "100px";
+                    box.style.height = "100px";
+                    box.style.zIndex = "10";
+
+                    const img = document.createElement("img");
+                    img.src = e.target.result;
+                    img.draggable = false;
+
+                    const handle = document.createElement("div");
+                    handle.className = "resize-handle";
+                    handle.addEventListener("mousedown", startResize);
+
+                    box.appendChild(img);
+                    box.appendChild(handle);
+
+                    img.addEventListener("mousedown", startDrag);
+
+                    img.addEventListener("contextmenu", function(e) {
+                    e.preventDefault();
+
+                    const sicher = confirm("Möchtest du dieses Bild wirklich löschen?");
+                    if (sicher) {
+                    box.remove();
+                    }
+                    });
+
+                    bilderBereich.appendChild(box);
+                    };
+
+        
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        function toggleSaveView() {
+            document.body.classList.toggle("save-view");
+        
+            const button = document.getElementById("saveBtn");
+        
+            if (document.body.classList.contains("save-view")) {
+                button.textContent = "Bearbeiten";
+            } else {
+                button.textContent = "Vision Board anzeigen";
+            }
+        }
+        
+        function downloadBoard() {
+            const sicher = confirm("Möchtest du dein Vision Board herunterladen?");
+            if (!sicher) return;
+        
+            const board = document.querySelector(".board");
+        
+            html2canvas(board).then(function(canvas) {
+                const link = document.createElement("a");
+                link.download = "vision-board.png";
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            });
+        }
+        
+        function wechselBackground(theme) {
+            if (theme === "minimal") {
+                document.body.style.background = "#ffffff";
+                document.body.style.backgroundSize = "";
+                document.body.style.backgroundRepeat = "";
+                document.body.style.backgroundPosition = "";
+            }
+        
+            if (theme === "nature") {
+                document.body.style.background = "#efe7d5";
+                document.body.style.backgroundSize = "";
+                document.body.style.backgroundRepeat = "";
+                document.body.style.backgroundPosition = "";
+            }
+        
+            if (theme === "leaf") {
+                document.body.style.background = "url('leaf-background.png')";
+                document.body.style.backgroundSize = "cover";
+                document.body.style.backgroundRepeat = "no-repeat";
+                document.body.style.backgroundPosition = "center";
+            }
+        }
+
+        
+    
+    function startDrag(e) {
+    if (e.button !== 0) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    wirdGeradeGezogen = true;
+    aktuellesBild = e.target.closest(".bild-box");
+
+    aktuellesBild.style.zIndex = 1000;
+    aktuellesBild.style.cursor = "grabbing";
+
+    startX = e.clientX;
+    startY = e.clientY;
+
+    startLeft = parseInt(aktuellesBild.style.left) || 0;
+    startTop = parseInt(aktuellesBild.style.top) || 0;
+
+    document.addEventListener("mousemove", bewegen);
+    document.addEventListener("mouseup", stopDrag);
+    }
+
+        function bewegen(e) {
+
+        if (!aktuellesBild) return;
+
+        e.preventDefault();  
+
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        aktuellesBild.style.left = startLeft + dx + "px";
+        aktuellesBild.style.top = startTop + dy + "px";
+        }
+
+        function stopDrag() {
+        document.removeEventListener("mousemove", bewegen);
+        document.removeEventListener("mouseup", stopDrag);
+
+        if (aktuellesBild) {
+        aktuellesBild.style.cursor = "grab";
+        }
+
+        aktuellesBild = null;
+        wirdGeradeGezogen = false;
+        }
+
+        window.addEventListener("mouseup", stopDrag);
+        window.addEventListener("blur", stopDrag);  
+        
+        let aktuellesResizeBild = null;
+        let resizeStartX = 0;
+        let resizeStartY = 0;
+        let resizeStartWidth = 0;
+        let resizeStartHeight = 0;
+
+    function startResize(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    aktuellesResizeBild = e.target.parentElement;
+
+    resizeStartX = e.clientX;
+    resizeStartY = e.clientY;
+
+    resizeStartWidth = parseInt(aktuellesResizeBild.style.width) || 100;
+    resizeStartHeight = parseInt(aktuellesResizeBild.style.height) || 100;
+
+    document.addEventListener("mousemove", resizeBild);
+    document.addEventListener("mouseup", stopResize);
+    }
+
+    // Ändert das Größe des Bildes
+    function resizeBild(e) {
+    if (!aktuellesResizeBild) return;
+
+    const dx = e.clientX - resizeStartX;
+    const dy = e.clientY - resizeStartY;
+
+    let neueBreite = resizeStartWidth + dx;
+    let neueHoehe = resizeStartHeight + dy;
+
+    if (neueBreite < 50) neueBreite = 50;
+    if (neueHoehe < 50) neueHoehe = 50;
+
+    aktuellesResizeBild.style.width = neueBreite + "px";
+    aktuellesResizeBild.style.height = neueHoehe + "px";
+    }
+
+    function stopResize() {
+    document.removeEventListener("mousemove", resizeBild);
+    document.removeEventListener("mouseup", stopResize);
+    aktuellesResizeBild = null;
+    }
+
+    let aktuellesBild = null;
+    let startX = 0;
+    let startY = 0;
+    let startLeft = 0;
+    let startTop = 0;
+    let wirdGeradeGezogen = false;
+
+    // function startDrag(e) {
+    // if (e.button !== 0) return;
+
+    // e.preventDefault();
+    // e.stopPropagation();
+
+    // wirdGeradeGezogen = true;
+    // aktuellesBild = e.target;
+    // aktuellesBild.style.zIndex = 1000;
+    // aktuellesBild.style.cursor = "grabbing";
+
+    // startX = e.clientX;
+    // startY = e.clientY;
+
+    // startLeft = parseInt(aktuellesBild.style.left) || 0;
+    // startTop = parseInt(aktuellesBild.style.top) || 0;
+
+    // document.addEventListener("mousemove", bewegen);
+    // document.addEventListener("mouseup", stopDrag);
+    // }
+
+    // function bewegen(e) {
+    // if (!aktuellesBild) return;
+
+    // e.preventDefault();
+
+    // const dx = e.clientX - startX;
+    // const dy = e.clientY - startY;
+
+    // aktuellesBild.style.left = startLeft + dx + "px";
+    // aktuellesBild.style.top = startTop + dy + "px";
+    // }
+
+    // function stopDrag() {
+    // document.removeEventListener("mousemove", bewegen);
+    // document.removeEventListener("mouseup", stopDrag);
+
+    // if (aktuellesBild) {
+    //     aktuellesBild.style.cursor = "grab";
+    // }
+
+    // aktuellesBild = null;
+    // wirdGeradeGezogen = false;
+    // }
+
+    // window.addEventListener("mouseup", stopDrag);
+    // window.addEventListener("blur", stopDrag);
+
+    </script>
+        
+        
+</body>
+</html>
