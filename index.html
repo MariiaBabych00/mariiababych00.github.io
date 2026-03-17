@@ -1,221 +1,322 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vision Board</title>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-}
-.board {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0px;
-}
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
 
-.feld {
-    border: 1px solid #3a2f2f;
-    padding: 20px;
-    text-align:center;
-    cursor:pointer;
-    min-height: 240px;
-    border-radius: 16px;
-    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
-}
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0px;
+        }
 
-.titel {
-    font-weight: bold;
-    font-size: 22px;
-    color: #2b1f14;
-}
+        .feld {
+            border: 1px solid #3a2f2f;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            min-height: 240px;
+            border-radius: 16px;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+        }
 
-.beschreibung {
-    display: none;
-    margin-top: 8px;
-    font-size: 14px;
-    color: #4a3a2a;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
+        .titel {
+            font-weight: bold;
+            font-size: 22px;
+            color: #2b1f14;
+        }
 
-.titel:hover + .beschreibung {
-    display: block;
-    opacity: 1;
-}
+        .beschreibung {
+            display: none;
+            margin-top: 8px;
+            font-size: 14px;
+            color: #4a3a2a;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
 
-.bilder {
-  position: relative;
-  min-height: 220px;
-  margin-top: 12px;
-}
+        .titel:hover+.beschreibung {
+            display: block;
+            opacity: 1;
+        }
 
-.bilder img {
-  position: absolute;
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-  border-radius: 8px;
-  cursor: grab;
-  z-index: 10;
-}
+        .bilder {
+            position: relative;
+            min-height: 220px;
+            margin-top: 12px;
+        }
 
-.bild-box {
-    position: absolute;
-    display: inline-block;
-}
+        .bilder img {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: grab;
+            z-index: 10;
+        }
 
-.bild-box img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 8px;
-    cursor: grab;
-}
+        .bild-box {
+            position: absolute;
+            display: inline-block;
+        }
 
-.resize-handle {
-    position: absolute;
-    right: -6px;
-    bottom: -6px;
-    width: 12px;
-    height: 12px;
-    background: white;
-    border: 1px solid #444;
-    border-radius: 50%;
-    cursor: nwse-resize;
-}
+        .bild-box img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: grab;
+        }
 
-.bild-box:hover .resize-handle {
-    display: block;
-}
+        .resize-handle {
+            position: absolute;
+            right: -6px;
+            bottom: -6px;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border: 1px solid #444;
+            border-radius: 50%;
+            cursor: nwse-resize;
+        }
 
-.save-view .resize-handle {
-    display: none;
-}
+        .bild-box:hover .resize-handle {
+            display: block;
+        }
 
-.save-view .titel,
-.save-view .beschreibung,
-.save-view input[type="file"] {
-  display: none;
-}
+        .save-view .resize-handle {
+            display: none;
+        }
 
-select,
-button {
-  margin: 12px 0 12px 12px;
-  padding: 10px 18px;
-  border-radius: 10px;
-  border: none;
-  background-color: #6b5a40;
-  color: white;
-  font-size: 14px;
-}
+        .save-view .titel,
+        .save-view .beschreibung,
+        .save-view input[type="file"] {
+            display: none;
+        }
 
-select {
-    padding: 8px;
-    border-radius: 8px;
-    font-size: 16px;
-}
+        select,
+        button {
+            margin: 12px 0 12px 12px;
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: none;
+            background-color: #6b5a40;
+            color: white;
+            font-size: 14px;
+        }
 
-.toolbar {
-    display: flex;
-    gap: 12px;
-    padding: 12px;
-    flex-wrap: wrap;
-}
+        select {
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 16px;
+        }
 
-.info-btn,
-input[type="file"] {
-    margin-top: 6px;
-    padding: 4px 10px;
-    border-radius: 6px;
-    border: 1px solid #444;
-    background: white;
-    color: #333;
-    font-size: 12px;
-    cursor: pointer;
-}
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            flex-wrap: wrap;
+        }
 
-.info-btn:hover,
-input[type="file"]:hover {
-    background: #333;
-    color: white;
-}
+        .info-btn,
+        input[type="file"] {
+            margin-top: 6px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background: white;
+            color: #333;
+            font-size: 12px;
+            cursor: pointer;
+        }
 
-.reichtum {
-  background-color: #c96dd8;
-}
+        .info-btn:hover,
+        input[type="file"]:hover {
+            background: #333;
+            color: white;
+        }
 
-.ruhm {
-  background-color: #ff2b2b;
-}
+        .versions-panel {
+            position: fixed;
+            top: 120px;
+            right: 16px;
+            width: 170px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            z-index: 2000;
+        }
 
-.liebe {
-  background-color: #f3a6b3;
-}
+        .versions-panel h3 {
+            margin: 0 0 8px 0;
+            font-size: 15px;
+            color: #2b1f14;
+        }
 
-.familie {
-  background-color: #1fa21f;
-}
+        #savedVersions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 420px;
+            overflow-y: auto;
+        }
 
-.gesundheit {
-  background-color: #ffe600;
-}
+        .version-thumb {
+            width: 100%;
+            border: 1px solid #d8d1c8;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+            cursor: pointer;
+        }
 
-.kreativität {
-  background-color: #f2f2f2;
-}
+        .version-thumb img {
+            width: 100%;
+            display: block;
+        }
 
-.wissen {
-  background-color: #d8c9a3;
-}
+        .app-layout {
+            display: flex;
+        }
 
-.karriere {
-  background-color: #7fa7b5;
-}
+        .board-area {
+            flex: 1;
+        }
 
-.reisen {
-  background-color: #d9d9d9;
-}
+        .versions-panel {
+            width: 200px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            border-left: 1px solid #ddd;
+        }
 
+        #versionSlots {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .version-slot {
+            width: 100%;
+            height: 120px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f7f7f7;
+            cursor: pointer;
+        }
+
+        .version-slot img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .reichtum {
+            background-color: #c96dd8;
+        }
+
+        .ruhm {
+            background-color: #ff2b2b;
+        }
+
+        .liebe {
+            background-color: #f3a6b3;
+        }
+
+        .familie {
+            background-color: #1fa21f;
+        }
+
+        .gesundheit {
+            background-color: #ffe600;
+        }
+
+        .kreativität {
+            background-color: #f2f2f2;
+        }
+
+        .wissen {
+            background-color: #d8c9a3;
+        }
+
+        .karriere {
+            background-color: #7fa7b5;
+        }
+
+        .reisen {
+            background-color: #d9d9d9;
+        }
     </style>
 </head>
+
 <body>
     <button id="saveBtn" onclick="toggleSaveView()">Vision Board anzeigen</button>
     <button onclick="downloadBoard()">Vision Board herunterladen</button>
-    
+
     <select onchange="wechselBackground(this.value)">
         <option value="minimal">Minimal</option>
         <option value="nature">Natur</option>
         <option value="leaf">Blätter</option>
-      </select>
+    </select>
+
+    <div class="app-layout">
+
+        <div class="board-area">
+            <div class="board">
+                <!-- dein ganzes Vision Board bleibt hier -->
+            </div>
+        </div>
+
+        <div class="versions-panel">
+            <h3>Versionen</h3>
+
+            <div id="versionSlots"></div>
+
+            <button onclick="versionSpeichern()">Version speichern</button>
+        </div>
+
+    </div>
+
+    </div>
 
     <div class="board">
         <div class="feld reichtum">
 
             <div class="titel">Reichtum / Wohlstand</div>
-            
+
             <p class="beschreibung">
-            Hier kannst du Fotos hinzufügen, die Geld, finanzielle Ziele oder materielle Wünsche symbolisieren.
+                Hier kannst du Fotos hinzufügen, die Geld, finanzielle Ziele oder materielle Wünsche symbolisieren.
             </p>
-            
-            <input type="file" accept="image/*" multiple onchange="bildHochladen(event)" onclick="event.stopPropagation()">
-            
+
+            <input type="file" accept="image/*" multiple onchange="bildHochladen(event)"
+                onclick="event.stopPropagation()">
+
             <div class="bilder"></div>
-            
-            </div>
 
-            <div class="feld ruhm">
+        </div>
 
-                <div class="titel">Ruhm / Anerkennung</div>
+        <div class="feld ruhm">
+
+            <div class="titel">Ruhm / Anerkennung</div>
 
             <p class="beschreibung">
                 Hier passen Bilder zu Erfolg, Anerkennung und Selbstvertrauen.
             </p>
-            <input type="file" accept="image/*" multiple onchange="bildHochladen(event)" onclick="event.stopPropagation()">
-            
+            <input type="file" accept="image/*" multiple onchange="bildHochladen(event)"
+                onclick="event.stopPropagation()">
+
             <div class="bilder"></div>
         </div>
 
@@ -226,8 +327,9 @@ input[type="file"]:hover {
             <p class="beschreibung">
                 Hier kannst du Fotos zu Liebe, Beziehung oder Ehe hinzufügen.
             </p>
-            <input type="file" accept="image/*" multiple onchange="bildHochladen(event)" onclick="event.stopPropagation()">
-            
+            <input type="file" accept="image/*" multiple onchange="bildHochladen(event)"
+                onclick="event.stopPropagation()">
+
             <div class="bilder"></div>
         </div>
 
@@ -235,94 +337,100 @@ input[type="file"]:hover {
 
             <div class="titel">Familie / Wurzeln</div>
 
-        <p class="beschreibung">
-            Hier passen Bilder zu Familie, Zuhause und Stabilität.
-        </p>
-        <input type="file" accept="image/*" multiple onchange="bildHochladen(event)" onclick="event.stopPropagation()">
-            
+            <p class="beschreibung">
+                Hier passen Bilder zu Familie, Zuhause und Stabilität.
+            </p>
+            <input type="file" accept="image/*" multiple onchange="bildHochladen(event)"
+                onclick="event.stopPropagation()">
+
             <div class="bilder"></div>
-    </div>
+        </div>
 
-    <div class="feld gesundheit">
+        <div class="feld gesundheit">
 
-        <div class="titel">Gesundheit / Ich selbst</div>
+            <div class="titel">Gesundheit / Ich selbst</div>
 
-        <p class="beschreibung">
-            Hier kannst du dein Foto oder Bilder für Gesundheit und Balance einfügen.
-        </p>
-        <input type="file" accept="image/*" multiple onchange="bildHochladen(event)" onclick="event.stopPropagation()">
-            
+            <p class="beschreibung">
+                Hier kannst du dein Foto oder Bilder für Gesundheit und Balance einfügen.
+            </p>
+            <input type="file" accept="image/*" multiple onchange="bildHochladen(event)"
+                onclick="event.stopPropagation()">
+
             <div class="bilder"></div>
-    </div>
+        </div>
 
-    <div class="feld kreativität">
+        <div class="feld kreativität">
 
-        <div class="titel">Kreativität / Kinder</div>
+            <div class="titel">Kreativität / Kinder</div>
 
-        <p class="beschreibung">
-            Hier passen kreative Ideen, Hobbys und Freude hinein.
-        </p>
-        <input type="file" accept="image/*" multiple onchange="bildHochladen(event)" onclick="event.stopPropagation()">
-            
+            <p class="beschreibung">
+                Hier passen kreative Ideen, Hobbys und Freude hinein.
+            </p>
+            <input type="file" accept="image/*" multiple onchange="bildHochladen(event)"
+                onclick="event.stopPropagation()">
+
             <div class="bilder"></div>
-    </div>
+        </div>
 
-    <div class="feld wissen">
+        <div class="feld wissen">
 
-        <div class="titel">Wissen / Bildung / Lernen</div>
+            <div class="titel">Wissen / Bildung / Lernen</div>
 
-        <p class="beschreibung">
-            Hier kannst du Fotos zu Lernen, Büchern und neuen Fähigkeiten hinzufügen.
-        </p>
-        <input type="file" accept="image/*" multiple onchange="bildHochladen(event)" onclick="event.stopPropagation()">
-            
+            <p class="beschreibung">
+                Hier kannst du Fotos zu Lernen, Büchern und neuen Fähigkeiten hinzufügen.
+            </p>
+            <input type="file" accept="image/*" multiple onchange="bildHochladen(event)"
+                onclick="event.stopPropagation()">
+
             <div class="bilder"></div>
-    </div>
+        </div>
 
-    <div class="feld karriere">
+        <div class="feld karriere">
 
-        <div class="titel">Karriere / Lebensweg</div>
+            <div class="titel">Karriere / Lebensweg</div>
 
-        <p class="beschreibung">
-            Hier passen Bilder zu Beruf, Karriere und deinen Zielen.
-        </p>
-        <input type="file" accept="image/*" multiple onchange="bildHochladen(event)" onclick="event.stopPropagation()">
-            
+            <p class="beschreibung">
+                Hier passen Bilder zu Beruf, Karriere und deinen Zielen.
+            </p>
+            <input type="file" accept="image/*" multiple onchange="bildHochladen(event)"
+                onclick="event.stopPropagation()">
+
             <div class="bilder"></div>
-    </div>
+        </div>
 
-    <div class="feld reisen">
+        <div class="feld reisen">
 
-        <div class="titel">Reisen / Unterstützung</div>
+            <div class="titel">Reisen / Unterstützung</div>
 
-        <p class="beschreibung">
+            <p class="beschreibung">
                 Hier kannst du Reiseziele oder hilfreiche Menschen symbolisch darstellen.
             </p>
-            <input type="file" accept="image/*" multiple onchange="bildHochladen(event)" onclick="event.stopPropagation()">
-            
+            <input type="file" accept="image/*" multiple onchange="bildHochladen(event)"
+                onclick="event.stopPropagation()">
+
             <div class="bilder"></div>
+        </div>
     </div>
-      </div>
-       <script>
+    <script>
         function zeigeText(element) {
-        if (wirdGeradeGezogen) return;
-        element.classList.toggle("aktiv");
+            if (wirdGeradeGezogen) return;
+            element.classList.toggle("aktiv");
         }
-        
+
         function bildHochladen(event) {
             const files = event.target.files;
             if (!files.length) return;
-        
+
             const feld = event.target.closest(".feld");
             const bilderBereich = feld.querySelector(".bilder");
-        
+
             const vorhandeneBilder = bilderBereich.querySelectorAll("img").length;
-        
+
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
                 const reader = new FileReader();
-        
-                reader.onload = function(e) {
+
+                reader.onload = function (e) {
                     const box = document.createElement("div");
                     box.className = "bild-box";
                     box.style.left = "20px";
@@ -344,49 +452,50 @@ input[type="file"]:hover {
 
                     img.addEventListener("mousedown", startDrag);
 
-                    img.addEventListener("contextmenu", function(e) {
-                    e.preventDefault();
+                    img.addEventListener("contextmenu", function (e) {
+                        e.preventDefault();
 
-                    const sicher = confirm("Möchtest du dieses Bild wirklich löschen?");
-                    if (sicher) {
-                    box.remove();
-                    }
+                        const sicher = confirm("Möchtest du dieses Bild wirklich löschen?");
+                        if (sicher) {
+                            box.remove();
+                        }
                     });
 
                     bilderBereich.appendChild(box);
-                    };
+                    arbeitsversionSpeichern();
+                };
 
-        
+
                 reader.readAsDataURL(file);
             }
         }
-        
+
         function toggleSaveView() {
             document.body.classList.toggle("save-view");
-        
+
             const button = document.getElementById("saveBtn");
-        
+
             if (document.body.classList.contains("save-view")) {
                 button.textContent = "Bearbeiten";
             } else {
                 button.textContent = "Vision Board anzeigen";
             }
         }
-        
+
         function downloadBoard() {
             const sicher = confirm("Möchtest du dein Vision Board herunterladen?");
             if (!sicher) return;
-        
+
             const board = document.querySelector(".board");
-        
-            html2canvas(board).then(function(canvas) {
+
+            html2canvas(board).then(function (canvas) {
                 const link = document.createElement("a");
                 link.download = "vision-board.png";
                 link.href = canvas.toDataURL("image/png");
                 link.click();
             });
         }
-        
+
         function wechselBackground(theme) {
             if (theme === "minimal") {
                 document.body.style.background = "#ffffff";
@@ -394,176 +503,421 @@ input[type="file"]:hover {
                 document.body.style.backgroundRepeat = "";
                 document.body.style.backgroundPosition = "";
             }
-        
+
             if (theme === "nature") {
                 document.body.style.background = "#efe7d5";
                 document.body.style.backgroundSize = "";
                 document.body.style.backgroundRepeat = "";
                 document.body.style.backgroundPosition = "";
             }
-        
+
             if (theme === "leaf") {
                 document.body.style.background = "url('leaf-background.png')";
                 document.body.style.backgroundSize = "cover";
                 document.body.style.backgroundRepeat = "no-repeat";
                 document.body.style.backgroundPosition = "center";
             }
+            document.body.dataset.theme = theme;
+            arbeitsversionSpeichern();
         }
 
-        
-    
-    function startDrag(e) {
-    if (e.button !== 0) return;
 
-    e.preventDefault();
-    e.stopPropagation();
 
-    wirdGeradeGezogen = true;
-    aktuellesBild = e.target.closest(".bild-box");
+        function startDrag(e) {
+            if (e.button !== 0) return;
 
-    aktuellesBild.style.zIndex = 1000;
-    aktuellesBild.style.cursor = "grabbing";
+            e.preventDefault();
+            e.stopPropagation();
 
-    startX = e.clientX;
-    startY = e.clientY;
+            wirdGeradeGezogen = true;
+            aktuellesBild = e.target.closest(".bild-box");
 
-    startLeft = parseInt(aktuellesBild.style.left) || 0;
-    startTop = parseInt(aktuellesBild.style.top) || 0;
+            aktuellesBild.style.zIndex = 1000;
+            aktuellesBild.style.cursor = "grabbing";
 
-    document.addEventListener("mousemove", bewegen);
-    document.addEventListener("mouseup", stopDrag);
-    }
+            startX = e.clientX;
+            startY = e.clientY;
+
+            startLeft = parseInt(aktuellesBild.style.left) || 0;
+            startTop = parseInt(aktuellesBild.style.top) || 0;
+
+            document.addEventListener("mousemove", bewegen);
+            document.addEventListener("mouseup", stopDrag);
+        }
 
         function bewegen(e) {
 
-        if (!aktuellesBild) return;
+            if (!aktuellesBild) return;
 
-        e.preventDefault();  
+            e.preventDefault();
 
-        const dx = e.clientX - startX;
-        const dy = e.clientY - startY;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
 
-        aktuellesBild.style.left = startLeft + dx + "px";
-        aktuellesBild.style.top = startTop + dy + "px";
+            aktuellesBild.style.left = startLeft + dx + "px";
+            aktuellesBild.style.top = startTop + dy + "px";
         }
 
         function stopDrag() {
-        document.removeEventListener("mousemove", bewegen);
-        document.removeEventListener("mouseup", stopDrag);
+            document.removeEventListener("mousemove", bewegen);
+            document.removeEventListener("mouseup", stopDrag);
 
-        if (aktuellesBild) {
-        aktuellesBild.style.cursor = "grab";
-        }
+            if (aktuellesBild) {
+                aktuellesBild.style.cursor = "grab";
+            }
 
-        aktuellesBild = null;
-        wirdGeradeGezogen = false;
+            aktuellesBild = null;
+            wirdGeradeGezogen = false;
+            arbeitsversionSpeichern();
         }
 
         window.addEventListener("mouseup", stopDrag);
-        window.addEventListener("blur", stopDrag);  
-        
+        window.addEventListener("blur", stopDrag);
+
         let aktuellesResizeBild = null;
         let resizeStartX = 0;
         let resizeStartY = 0;
         let resizeStartWidth = 0;
         let resizeStartHeight = 0;
 
-    function startResize(e) {
-    e.preventDefault();
-    e.stopPropagation();
+        function startResize(e) {
+            e.preventDefault();
+            e.stopPropagation();
 
-    aktuellesResizeBild = e.target.parentElement;
+            aktuellesResizeBild = e.target.parentElement;
 
-    resizeStartX = e.clientX;
-    resizeStartY = e.clientY;
+            resizeStartX = e.clientX;
+            resizeStartY = e.clientY;
 
-    resizeStartWidth = parseInt(aktuellesResizeBild.style.width) || 100;
-    resizeStartHeight = parseInt(aktuellesResizeBild.style.height) || 100;
+            resizeStartWidth = parseInt(aktuellesResizeBild.style.width) || 100;
+            resizeStartHeight = parseInt(aktuellesResizeBild.style.height) || 100;
 
-    document.addEventListener("mousemove", resizeBild);
-    document.addEventListener("mouseup", stopResize);
-    }
+            document.addEventListener("mousemove", resizeBild);
+            document.addEventListener("mouseup", stopResize);
+        }
 
-    // Ändert das Größe des Bildes
-    function resizeBild(e) {
-    if (!aktuellesResizeBild) return;
+        function resizeBild(e) {
+            if (!aktuellesResizeBild) return;
 
-    const dx = e.clientX - resizeStartX;
-    const dy = e.clientY - resizeStartY;
+            const dx = e.clientX - resizeStartX;
+            const dy = e.clientY - resizeStartY;
 
-    let neueBreite = resizeStartWidth + dx;
-    let neueHoehe = resizeStartHeight + dy;
+            let neueBreite = resizeStartWidth + dx;
+            let neueHoehe = resizeStartHeight + dy;
 
-    if (neueBreite < 50) neueBreite = 50;
-    if (neueHoehe < 50) neueHoehe = 50;
+            if (neueBreite < 50) neueBreite = 50;
+            if (neueHoehe < 50) neueHoehe = 50;
 
-    aktuellesResizeBild.style.width = neueBreite + "px";
-    aktuellesResizeBild.style.height = neueHoehe + "px";
-    }
+            aktuellesResizeBild.style.width = neueBreite + "px";
+            aktuellesResizeBild.style.height = neueHoehe + "px";
+        }
 
-    function stopResize() {
-    document.removeEventListener("mousemove", resizeBild);
-    document.removeEventListener("mouseup", stopResize);
-    aktuellesResizeBild = null;
-    }
+        function stopResize() {
+            document.removeEventListener("mousemove", resizeBild);
+            document.removeEventListener("mouseup", stopResize);
+            aktuellesResizeBild = null;
+            arbeitsversionSpeichern();
+        }
 
-    let aktuellesBild = null;
-    let startX = 0;
-    let startY = 0;
-    let startLeft = 0;
-    let startTop = 0;
-    let wirdGeradeGezogen = false;
+        let aktuellesBild = null;
+        let startX = 0;
+        let startY = 0;
+        let startLeft = 0;
+        let startTop = 0;
+        let wirdGeradeGezogen = false;
 
-    // function startDrag(e) {
-    // if (e.button !== 0) return;
+        function versionSpeichern() {
+            const board = document.querySelector(".board");
 
-    // e.preventDefault();
-    // e.stopPropagation();
+            document.body.classList.add("save-view");
 
-    // wirdGeradeGezogen = true;
-    // aktuellesBild = e.target;
-    // aktuellesBild.style.zIndex = 1000;
-    // aktuellesBild.style.cursor = "grabbing";
+            html2canvas(board).then(function (canvas) {
+                const bildDaten = canvas.toDataURL("image/png");
 
-    // startX = e.clientX;
-    // startY = e.clientY;
+                const preview = document.getElementById("savedPreview");
+                preview.innerHTML = "";
 
-    // startLeft = parseInt(aktuellesBild.style.left) || 0;
-    // startTop = parseInt(aktuellesBild.style.top) || 0;
+                const img = document.createElement("img");
+                img.src = bildDaten;
+                img.style.cursor = "pointer";
 
-    // document.addEventListener("mousemove", bewegen);
-    // document.addEventListener("mouseup", stopDrag);
-    // }
+                img.onclick = function () {
+                    zeigeGespeicherteVersion(bildDaten);
+                };
 
-    // function bewegen(e) {
-    // if (!aktuellesBild) return;
+                preview.appendChild(img);
 
-    // e.preventDefault();
+                localStorage.setItem("visionBoardPreview", bildDaten);
 
-    // const dx = e.clientX - startX;
-    // const dy = e.clientY - startY;
+                document.body.classList.remove("save-view");
+            });
+        }
 
-    // aktuellesBild.style.left = startLeft + dx + "px";
-    // aktuellesBild.style.top = startTop + dy + "px";
-    // }
+        function zeigeGespeicherteVersion(bildDaten) {
 
-    // function stopDrag() {
-    // document.removeEventListener("mousemove", bewegen);
-    // document.removeEventListener("mouseup", stopDrag);
+            const popup = document.createElement("div");
+            popup.style.position = "fixed";
+            popup.style.top = "0";
+            popup.style.left = "0";
+            popup.style.width = "100%";
+            popup.style.height = "100%";
+            popup.style.background = "rgba(0,0,0,0.6)";
+            popup.style.display = "flex";
+            popup.style.alignItems = "center";
+            popup.style.justifyContent = "center";
+            popup.style.zIndex = "9999";
 
-    // if (aktuellesBild) {
-    //     aktuellesBild.style.cursor = "grab";
-    // }
+            const img = document.createElement("img");
+            img.src = bildDaten;
+            img.style.maxWidth = "90%";
+            img.style.maxHeight = "90%";
+            img.style.borderRadius = "10px";
+            img.style.boxShadow = "0 10px 30px rgba(0,0,0,0.4)";
 
-    // aktuellesBild = null;
-    // wirdGeradeGezogen = false;
-    // }
+            popup.appendChild(img);
 
-    // window.addEventListener("mouseup", stopDrag);
-    // window.addEventListener("blur", stopDrag);
+            popup.onclick = function () {
+                popup.remove();
+            };
+
+            document.body.appendChild(popup);
+        }
+
+        function neueVersion() {
+            const preview = document.getElementById("savedPreview");
+            preview.innerHTML = "Noch keine gespeicherte Version";
+            localStorage.removeItem("visionBoardPreview");
+        }
+
+        window.addEventListener("load", function () {
+            const gespeicherteVersion = localStorage.getItem("visionBoardPreview");
+
+            if (gespeicherteVersion) {
+                const preview = document.getElementById("savedPreview");
+                preview.innerHTML = "";
+
+                const img = document.createElement("img");
+                img.src = gespeicherteVersion;
+                preview.appendChild(img);
+            }
+        });
+
+        function boardDatenSammeln() {
+            const daten = {
+                background: document.body.dataset.theme || "minimal",
+                felder: []
+            };
+
+            document.querySelectorAll(".feld").forEach((feld) => {
+                const feldKlassen = Array.from(feld.classList).filter(c => c !== "feld" && c !== "aktiv");
+                const feldName = feldKlassen[0] || "";
+
+                const bilder = [];
+                feld.querySelectorAll(".bild-box").forEach((box) => {
+                    const img = box.querySelector("img");
+                    bilder.push({
+                        src: img.src,
+                        left: box.style.left,
+                        top: box.style.top,
+                        width: box.style.width,
+                        height: box.style.height,
+                        zIndex: box.style.zIndex || "10"
+                    });
+                });
+
+                daten.felder.push({
+                    feldName,
+                    bilder
+                });
+            });
+
+            return daten;
+        }
+
+        function arbeitsversionSpeichern() {
+            const daten = boardDatenSammeln();
+            localStorage.setItem("visionBoardAktuell", JSON.stringify(daten));
+        }
+
+        function arbeitsversionLaden() {
+            const raw = localStorage.getItem("visionBoardAktuell");
+            if (!raw) return;
+
+            const daten = JSON.parse(raw);
+
+            if (daten.background) {
+                document.body.dataset.theme = daten.background;
+                wechselBackground(daten.background);
+            }
+
+            daten.felder.forEach((feldDaten) => {
+                const feld = document.querySelector(".feld." + feldDaten.feldName);
+                if (!feld) return;
+
+                const bilderBereich = feld.querySelector(".bilder");
+                bilderBereich.innerHTML = "";
+
+                feldDaten.bilder.forEach((bild) => {
+                    const box = document.createElement("div");
+                    box.className = "bild-box";
+                    box.style.left = bild.left;
+                    box.style.top = bild.top;
+                    box.style.width = bild.width;
+                    box.style.height = bild.height;
+                    box.style.zIndex = bild.zIndex;
+                    const img = document.createElement("img");
+                    img.src = bild.src;
+                    img.draggable = false;
+                    img.addEventListener("mousedown", startDrag);
+
+                    img.addEventListener("contextmenu", function (e) {
+                        e.preventDefault();
+                        const sicher = confirm("Möchtest du dieses Bild wirklich löschen?");
+                        if (sicher) {
+                            box.remove();
+                            arbeitsversionSpeichern();
+                        }
+                    });
+
+                    const handle = document.createElement("div");
+                    handle.className = "resize-handle";
+                    handle.addEventListener("mousedown", startResize);
+
+                    box.appendChild(img);
+                    box.appendChild(handle);
+                    bilderBereich.appendChild(box);
+                });
+            });
+        }
+
+        function versionSpeichern() {
+
+            const board = document.querySelector(".board");
+
+            html2canvas(board).then(canvas => {
+
+                const data = canvas.toDataURL();
+
+                let versionen = JSON.parse(localStorage.getItem("visionVersionen") || "[]");
+
+                versionen.unshift(data);
+
+                versionen = versionen.slice(0, 3); // maximal 3 Slots
+
+                localStorage.setItem("visionVersionen", JSON.stringify(versionen));
+
+                versionenRendern();
+
+            });
+        }
+
+        // versionenAnzeigen();
+
+        function versionenAnzeigen() {
+            const container = document.getElementById("savedVersions");
+            if (!container) return;
+
+            container.innerHTML = "";
+
+            const alleVersionen = JSON.parse(localStorage.getItem("visionBoardVersionen") || "[]");
+
+            alleVersionen.forEach((version, index) => {
+                const item = document.createElement("div");
+                item.className = "version-thumb";
+
+                const miniBoard = document.createElement("div");
+                miniBoard.style.padding = "8px";
+                miniBoard.style.fontSize = "12px";
+                miniBoard.style.color = "#6b5a40";
+                miniBoard.textContent = "Version " + (index + 1);
+
+                item.appendChild(miniBoard);
+
+                item.onclick = function () {
+                    versionLaden(version.id);
+                };
+
+                container.appendChild(item);
+            });
+        }
+
+        function versionLaden(id) {
+            const alleVersionen = JSON.parse(localStorage.getItem("visionBoardVersionen") || "[]");
+            const version = alleVersionen.find(v => v.id === id);
+            if (!version) return;
+
+            localStorage.setItem("visionBoardAktuell", JSON.stringify(version.daten));
+            arbeitsversionLaden();
+        }
+
+        window.addEventListener("load", function () {
+            arbeitsversionLaden();
+            versionenAnzeigen();
+        });
+
+        function versionenRendern() {
+
+            const container = document.getElementById("versionSlots");
+
+            container.innerHTML = "";
+
+            const versionen = JSON.parse(localStorage.getItem("visionVersionen") || "[]");
+
+            versionen.forEach((bild, index) => {
+
+                const slot = document.createElement("div");
+                slot.className = "version-slot";
+
+                const img = document.createElement("img");
+                img.src = bild;
+
+                slot.appendChild(img);
+
+                slot.onclick = () => {
+                    zeigeVersionGross(bild);
+                };
+
+                container.appendChild(slot);
+
+            });
+
+        }
+
+        function zeigeVersionGross(bild) {
+
+            const overlay = document.createElement("div");
+
+            overlay.style.position = "fixed";
+            overlay.style.top = 0;
+            overlay.style.left = 0;
+            overlay.style.width = "100%";
+            overlay.style.height = "100%";
+            overlay.style.background = "rgba(0,0,0,0.7)";
+            overlay.style.display = "flex";
+            overlay.style.alignItems = "center";
+            overlay.style.justifyContent = "center";
+            overlay.style.zIndex = 9999;
+
+            const img = document.createElement("img");
+            img.src = bild;
+            img.style.maxWidth = "90%";
+            img.style.maxHeight = "90%";
+
+            overlay.appendChild(img);
+
+            overlay.onclick = () => overlay.remove();
+
+            document.body.appendChild(overlay);
+
+        }
+
+        window.addEventListener("load", versionenRendern);
+
+
 
     </script>
-        
-        
+
+
 </body>
+
 </html>
