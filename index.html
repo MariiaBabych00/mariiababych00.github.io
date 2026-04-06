@@ -12,6 +12,15 @@
             font-family: Arial, sans-serif;
         }
 
+        button, select {
+            width: 240px;
+            text-align: center;
+        }
+
+        button.grow {
+            transform: scale(1.2);
+        }
+
         .board {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -275,6 +284,7 @@
 </head>
 
 <body>
+    <button onclick="boardLoeschen()">Board löschen</button>
     <button id="saveBtn" onclick="toggleSaveView()">Vision Board anzeigen</button>
     <button onclick="downloadBoard()">Vision Board herunterladen</button>
 
@@ -423,6 +433,65 @@
 
     </div>
     <script>
+        // indexedDB.deleteDatabase("VisionBoardDB");
+        // neu: Datenbank erstellen
+        let dbPromise;
+        // const request = indexedDB.open("VisionBoardDB");
+        const visionVersionenHtml = "visionVersionenHtml";
+        const visionVersionenImg = "visionVersionenImg";
+        const visionAktuelleVersion = "visionAktuelleVersion";
+
+        async function openDB() {
+            if (dbPromise) return dbPromise;
+
+            dbPromise = new Promise((resolve, reject) => {
+                const request = indexedDB.open("VisionBoardDB");
+
+                request.onerror = (event) => {
+                    console.error("Nutzen von IndexedDB nicht erlaubt");
+                };
+
+                request.onupgradeneeded = (event) => {
+                    let db = event.target.result;
+
+                    if (!db.objectStoreNames.contains(visionVersionenHtml)) {
+                        db.createObjectStore(visionVersionenHtml, { keyPath: "id", autoIncrement: true });
+                        console.log(`${visionVersionenHtml} erstellt`);
+                    }
+
+                    if (!db.objectStoreNames.contains(visionVersionenImg)) {
+                        db.createObjectStore(visionVersionenImg, { keyPath: "id", autoIncrement: true });
+                        console.log(`${visionVersionenImg} erstellt`);
+                    }
+
+                    if (!db.objectStoreNames.contains(visionAktuelleVersion)) {
+                        db.createObjectStore(visionAktuelleVersion, { keyPath: "id", autoIncrement: true });
+                        console.log(`${visionAktuelleVersion} erstellt`);
+                    }
+                };
+
+                request.onsuccess = (event) => {
+                    console.log("Verbindung mit IndexedDB erstellt");
+                    let db = event.target.result;
+
+                    const htmlVersionenStoreExistiert = db.objectStoreNames.contains(visionVersionenHtml);
+                    console.log("Existiert:", htmlVersionenStoreExistiert);
+
+                    const bildVersionenStoreExistiert = db.objectStoreNames.contains(visionVersionenImg);
+                    console.log("Existiert:", bildVersionenStoreExistiert);
+
+                    const visionAktuelleVersionExistiert = db.objectStoreNames.contains(visionAktuelleVersion);
+                    console.log("Existiert:", visionAktuelleVersionExistiert);
+
+                    resolve(db);
+                };
+            });
+
+            return dbPromise;
+        }
+        
+
+
         function zeigeText(element) {
             if (wirdGeradeGezogen) return;
             element.classList.toggle("aktiv");
@@ -508,6 +577,9 @@
         }
 
         function wechselBackground(theme) {
+            const selectElement = document.querySelector("select");
+            selectElement.value = theme;
+
             if (theme === "minimal") {
                 document.body.style.background = "#ffffff";
                 document.body.style.backgroundSize = "";
@@ -637,33 +709,6 @@
         let startTop = 0;
         let wirdGeradeGezogen = false;
 
-        // function versionSpeichern() {
-        //     const board = document.querySelector(".board");
-
-        //     document.body.classList.add("save-view");
-
-        //     html2canvas(board).then(function (canvas) {
-        //         const bildDaten = canvas.toDataURL("image/png");
-
-        //         const preview = document.getElementById("savedPreview");
-        //         preview.innerHTML = "";
-
-        //         const img = document.createElement("img");
-        //         img.src = bildDaten;
-        //         img.style.cursor = "pointer";
-
-        //         img.onclick = function () {
-        //             zeigeGespeicherteVersion(bildDaten);
-        //         };
-
-        //         preview.appendChild(img);
-
-        //         localStorage.setItem("visionBoardPreview", bildDaten);
-
-        //         document.body.classList.remove("save-view");
-        //     });
-        // }
-
         function zeigeGespeicherteVersion(bildDaten) {
 
             const popup = document.createElement("div");
@@ -694,24 +739,24 @@
             document.body.appendChild(popup);
         }
 
-        function neueVersion() {
-            const preview = document.getElementById("savedPreview");
-            preview.innerHTML = "Noch keine gespeicherte Version";
-            localStorage.removeItem("visionBoardPreview");
-        }
+        // function neueVersion() {
+        //     const preview = document.getElementById("savedPreview");
+        //     preview.innerHTML = "Noch keine gespeicherte Version";
+        //     localStorage.removeItem("visionBoardPreview"); //localstorage
+        // }
 
-        window.addEventListener("load", function () {
-            const gespeicherteVersion = localStorage.getItem("visionBoardPreview");
+        // window.addEventListener("load", function () {
+        //     const gespeicherteVersion = localStorage.getItem("visionBoardPreview"); //localstorage
 
-            if (gespeicherteVersion) {
-                const preview = document.getElementById("savedPreview");
-                preview.innerHTML = "";
+        //     if (gespeicherteVersion) {
+        //         const preview = document.getElementById("savedPreview");
+        //         preview.innerHTML = "";
 
-                const img = document.createElement("img");
-                img.src = gespeicherteVersion;
-                preview.appendChild(img);
-            }
-        });
+        //         const img = document.createElement("img");
+        //         img.src = gespeicherteVersion;
+        //         preview.appendChild(img);
+        //     }
+        // });
 
         function boardDatenSammeln() {
             const daten = {
@@ -745,16 +790,19 @@
             return daten;
         }
 
-        function arbeitsversionSpeichern() {
+        async function arbeitsversionSpeichern() {
             const daten = boardDatenSammeln();
-            localStorage.setItem("visionBoardAktuell", JSON.stringify(daten));
+            let allVersionen = await indexedDbGetAll(visionAktuelleVersion);
+            await indexedDbDelete(visionAktuelleVersion, allVersionen);
+            await indexedDbSetItem(visionAktuelleVersion, daten);
         }
 
-        function arbeitsversionLaden() {
-            const raw = localStorage.getItem("visionBoardAktuell");
+        async function arbeitsversionLaden() {
+            const raw = await indexedDbGetAll(visionAktuelleVersion);
             if (!raw) return;
 
-            const daten = JSON.parse(raw);
+            const daten = raw[0];
+            if (!daten) return;
 
             if (daten.background) {
                 document.body.dataset.theme = daten.background;
@@ -781,12 +829,12 @@
                     img.draggable = false;
                     img.addEventListener("mousedown", startDrag);
 
-                    img.addEventListener("contextmenu", function (e) {
+                    img.addEventListener("contextmenu", async function (e) {
                         e.preventDefault();
                         const sicher = confirm("Möchtest du dieses Bild wirklich löschen?");
                         if (sicher) {
                             box.remove();
-                            arbeitsversionSpeichern();
+                            await arbeitsversionSpeichern();
                         }
                     });
 
@@ -801,50 +849,115 @@
             });
         }
 
-        function versionSpeichern() {
+        async function versionSpeichern() {
 
             const board = document.querySelector(".board");
 
-            html2canvas(board).then(canvas => {
+            html2canvas(board).then(async canvas => {
 
                 const data = canvas.toDataURL();
+                
+                let result = await indexedDbSetItem(visionVersionenImg, {
+                    img: data,
+                    createdAt: Date.now()
+                })
 
-                let versionen = JSON.parse(localStorage.getItem("visionVersionen") || "[]");
+                let versionen = await indexedDbGetAll(visionVersionenImg) || "[]";
 
-                versionen.unshift(data);
+                const zuLoeschen = await versionen.slice(3);
+                await indexedDbDelete(visionVersionenImg, zuLoeschen);
 
-                versionen = versionen.slice(0, 3);
-
-                localStorage.setItem("visionVersionen", JSON.stringify(versionen));
-
-                versionenRendern();
+                await versionenRendern(); // await zu allen versionenRendern() und function als async gesetzt
 
             });
 
-            // html2storage(board);
+            await html2storage(board);
         }
 
-        // // Anderung 2
-        // function html2storage(board) {
-        //     const boardHtml = board.innerHTML;
+        // Anderung 2 DB verwenden
+        async function html2storage(board) {
+            const boardHtml = board.innerHTML;
+            // speichern
+            let result = await indexedDbSetItem(visionVersionenHtml, {
+                    html: boardHtml,
+                    createdAt: Date.now()
+                })
 
-        //     let versionen = JSON.parse(localStorage.getItem("visionHtmlVersionen")) || [];
+            console.log(result);
 
-        //     versionen.unshift(boardHtml);
+            // alte Versionen löschen (nur 3 behalten)
+            const versionen = await htmlVersionenLaden();
 
-        //     versionen = versionen.slice(0, 3);
+            const zuLoeschen = await versionen.slice(3);
 
-        //     localStorage.setItem("visionHtmlVersionen", JSON.stringify(versionen));
-        // }
-        // // 
+            await indexedDbDelete(visionVersionenHtml, zuLoeschen);
+        }
 
-        function versionenAnzeigen() {
+        async function htmlVersionenLaden() {
+            return await indexedDbGetAll(visionVersionenHtml);
+        }
+
+        // nimmt den Name des ObjectStores und die Daten zu pushen
+        async function indexedDbSetItem(objectStore, daten) {
+            db = await openDB();
+
+            let result = await new Promise((resolve, reject) => {
+                const tx = db.transaction(objectStore, "readwrite");
+                const store = tx.objectStore(objectStore);
+
+                store.add(daten);
+
+                tx.oncomplete = resolve;
+                tx.onerror = () => reject(tx.error);
+            });
+
+            return result;
+        }
+
+        async function indexedDbGetAll(objectStore) {
+            db = await openDB();
+
+            let result = await new Promise((resolve, reject) => {
+                const tx = db.transaction(objectStore, "readonly");
+                const store = tx.objectStore(objectStore);
+                const request = store.getAll();
+
+                request.onsuccess = () => {
+                    const daten = request.result.sort((a, b) => b.createdAt - a.createdAt);
+                    resolve(daten);
+                };
+
+                request.onerror = () => reject(request.error);
+            });
+
+            return result;
+        }
+
+        async function indexedDbDelete(objectStore, zuLoeschen) {
+            db = await openDB();
+
+            let result = await new Promise((resolve, reject) => {
+                const tx = db.transaction(objectStore, "readwrite");
+                const store = tx.objectStore(objectStore);
+
+                zuLoeschen.forEach(v => store.delete(v.id));
+
+                tx.oncomplete = resolve;
+                tx.onerror = () => reject(tx.error);
+
+                console.log(tx.oncomplete);
+            });
+
+            return result;
+        }
+
+        async function versionenAnzeigen() {
             const container = document.getElementById("savedVersions");
             if (!container) return;
 
             container.innerHTML = "";
 
-            const alleVersionen = JSON.parse(localStorage.getItem("visionBoardVersionen") || "[]");
+            const alleVersionen = JSON.parse(localStorage.getItem("visionBoardVersionen") || "[]"); //localstorage
 
             alleVersionen.forEach((version, index) => {
                 const item = document.createElement("div");
@@ -858,35 +971,40 @@
 
                 item.appendChild(miniBoard);
 
-                item.onclick = function () {
-                    versionLaden(version.id);
+                item.onclick = async function () {
+                    await versionLaden(version.id);
                 };
+
+                // item.addEventListener("contextmenu", versionLoeschen);
 
                 container.appendChild(item);
             });
         }
 
-        function versionLaden(id) {
-            const alleVersionen = JSON.parse(localStorage.getItem("visionBoardVersionen") || "[]");
+        async function versionLaden(id) {
+            const alleVersionen = JSON.parse(localStorage.getItem("visionBoardVersionen") || "[]"); //localstorage
             const version = alleVersionen.find(v => v.id === id);
             if (!version) return;
 
-            localStorage.setItem("visionBoardAktuell", JSON.stringify(version.daten));
-            arbeitsversionLaden();
+            // wir kommen hier nie an
+
+            localStorage.setItem("visionBoardAktuell", JSON.stringify(version.daten)); //localstorage
+
+            await arbeitsversionLaden();
         }
 
-        window.addEventListener("load", function () {
-            arbeitsversionLaden();
-            versionenAnzeigen();
+        window.addEventListener("load", async function () {
+            await arbeitsversionLaden();
+            await versionenAnzeigen();
         });
 
-        function versionenRendern() {
+        async function versionenRendern() {
 
             const container = document.getElementById("versionSlots");
 
             container.innerHTML = "";
 
-            const versionen = JSON.parse(localStorage.getItem("visionVersionen") || "[]");
+            const versionen = await indexedDbGetAll(visionVersionenImg) || "[]";
 
             versionen.forEach((bild, index) => {
 
@@ -894,13 +1012,19 @@
                 slot.className = "version-slot";
 
                 const img = document.createElement("img");
-                img.src = bild;
+                img.src = bild.img;
+                img.dataset.index = bild.id; // NEW
+                // img.dataset.htmlIndex = bild.id; // NEW
 
                 slot.appendChild(img);
 
                 slot.onclick = () => {
-                    zeigeVersionGross(bild);
+                    zeigeVersionGross(bild ,index);
                 };
+
+                slot.addEventListener("contextmenu", versionLoeschen);
+
+                slot.on
 
                 container.appendChild(slot);
 
@@ -908,36 +1032,38 @@
 
         }
 
-        function zeigeVersionGross(bild) {
-            const overlay = document.createElement("div");
+        // neu: Datenbank
+        // Wiederbearbeitung: nicht Bild anzeigen, sondern den ausgewaehlten Zustand laden und Inhalt der .board Element mit dem Inhalt der ausgewaehlten Version ersetzen.
+        // Und danach die verlorene EventListeners wieder hinzufuegen
+        async function zeigeVersionGross(bild, index) {
+            const loadedHtml = await htmlVersionenLaden()
+            const version = loadedHtml[index];
+            const board = document.querySelector(".board");
 
-            overlay.style.position = "fixed";
-            overlay.style.top = 0;
-            overlay.style.left = 0;
-            overlay.style.width = "100%";
-            overlay.style.height = "100%";
-            overlay.style.background = "rgba(0,0,0,0.7)";
-            overlay.style.display = "flex";
-            overlay.style.alignItems = "center";
-            overlay.style.justifyContent = "center";
-            overlay.style.zIndex = 9999;
+            if (version)
+                board.innerHTML = version.html;
 
-            const img = document.createElement("img");
-            img.src = bild;
-            img.style.maxWidth = "90%";
-            img.style.maxHeight = "90%";
+            const bildBoxList = document.querySelectorAll(".bild-box");
+            const resizeHandles = document.querySelectorAll(".resize-handle");
 
-            overlay.appendChild(img);
+            bildBoxList.forEach(bildBox => {
+                bildBox.addEventListener("mousedown", startDrag);
+                bildBox.addEventListener("contextmenu", function (e) {
+                    e.preventDefault();
 
-            overlay.onclick = () => overlay.remove();
+                    const sicher = confirm("Möchtest du dieses Bild wirklich löschen?");
+                    if (sicher) {
+                        bildBox.remove();
+                    }
+                });
+            })
 
-            document.body.appendChild(overlay);
-
-
-
+            resizeHandles.forEach(resizeHandle => {
+                resizeHandle.addEventListener("mousedown", startResize);
+            })
         }
 
-        // Anderung 1.
+        // neu SideToggle
         function sidePanelToggle() {
             const toggleBtn = document.getElementById("toggleBtn");
             const versionsPanel = document.querySelector(".versions-panel");
@@ -951,6 +1077,43 @@
             }
         }
         //
+
+        function boardLoeschen() {
+            const bildBoxList = document.querySelectorAll(".bild-box");
+            const resizeHandles = document.querySelectorAll(".resize-handle");
+            const inputFields = document.querySelectorAll('input[type="file"]');
+
+            bildBoxList.forEach(bildBox => {
+                bildBox.remove();
+            })
+
+            resizeHandles.forEach(resizeHandle => {
+                resizeHandle.remove();
+            })
+
+            inputFields.forEach(inputField => {
+                inputField.value = "";
+            })
+        }
+
+        async function versionLoeschen(event) {
+            event.preventDefault();
+            const sicher = confirm("Möchtest du dieses Bild wirklich löschen?");
+            
+            if (sicher) {
+                db = await openDB();
+
+                const visionVersionenHtmlObjectStore = db.transaction(visionVersionenHtml, "readwrite").objectStore(visionVersionenHtml);
+                const visionVersionenImgObjectStore = db.transaction(visionVersionenImg, "readwrite").objectStore(visionVersionenImg);
+
+                visionVersionenHtmlObjectStore.delete(Number(event.target.dataset.index));
+                visionVersionenImgObjectStore.delete(Number(event.target.dataset.index));
+
+                event.target.parentElement.remove();
+
+                await versionenRendern();
+            }
+        }
 
         window.addEventListener("load", versionenRendern);
 
