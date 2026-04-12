@@ -441,6 +441,8 @@
         const visionVersionenImg = "visionVersionenImg";
         const visionAktuelleVersion = "visionAktuelleVersion";
 
+        const obereLimit = 320;
+
         async function openDB() {
             if (dbPromise) return dbPromise;
 
@@ -562,13 +564,29 @@
             }
         }
 
+        // function downloadBoard() {
+        //     const sicher = confirm("Möchtest du dein Vision Board herunterladen?");
+        //     if (!sicher) return;
+
+        //     const board = document.querySelector(".board");
+
+        //     html2canvas(board).then(function (canvas) {
+        //         const link = document.createElement("a");
+        //         link.download = "vision-board.png";
+        //         link.href = canvas.toDataURL("image/png");
+        //         link.click();
+        //     });
+        // }
+
         function downloadBoard() {
             const sicher = confirm("Möchtest du dein Vision Board herunterladen?");
             if (!sicher) return;
 
             const board = document.querySelector(".board");
 
+            convertImgsForCanvas(board);
             html2canvas(board).then(function (canvas) {
+                revertImgsAfterCanvas(board);
                 const link = document.createElement("a");
                 link.download = "vision-board.png";
                 link.href = canvas.toDataURL("image/png");
@@ -690,6 +708,12 @@
 
             if (neueBreite < 50) neueBreite = 50;
             if (neueHoehe < 50) neueHoehe = 50;
+
+            if (neueBreite > obereLimit)
+                neueBreite = obereLimit;
+            
+            if (neueHoehe > obereLimit)
+                neueHoehe = obereLimit;
 
             aktuellesResizeBild.style.width = neueBreite + "px";
             aktuellesResizeBild.style.height = neueHoehe + "px";
@@ -849,14 +873,40 @@
             });
         }
 
-        async function versionSpeichern() {
+        // async function versionSpeichern() {
 
+        //     const board = document.querySelector(".board");
+
+        //     html2canvas(board).then(async canvas => {
+
+        //         const data = canvas.toDataURL();
+                
+        //         let result = await indexedDbSetItem(visionVersionenImg, {
+        //             img: data,
+        //             createdAt: Date.now()
+        //         })
+
+        //         let versionen = await indexedDbGetAll(visionVersionenImg) || "[]";
+
+        //         const zuLoeschen = await versionen.slice(3);
+        //         await indexedDbDelete(visionVersionenImg, zuLoeschen);
+
+        //         await versionenRendern(); // await zu allen versionenRendern() und function als async gesetzt
+
+        //     });
+
+        //     await html2storage(board);
+        // }
+
+        async function versionSpeichern() {
             const board = document.querySelector(".board");
 
+            convertImgsForCanvas(board);
             html2canvas(board).then(async canvas => {
+                revertImgsAfterCanvas(board);
 
                 const data = canvas.toDataURL();
-                
+
                 let result = await indexedDbSetItem(visionVersionenImg, {
                     img: data,
                     createdAt: Date.now()
@@ -867,8 +917,7 @@
                 const zuLoeschen = await versionen.slice(3);
                 await indexedDbDelete(visionVersionenImg, zuLoeschen);
 
-                await versionenRendern(); // await zu allen versionenRendern() und function als async gesetzt
-
+                await versionenRendern();
             });
 
             await html2storage(board);
@@ -1113,6 +1162,33 @@
 
                 await versionenRendern();
             }
+        }
+
+        function convertImgsForCanvas(board) {
+            board.querySelectorAll(".bild-box").forEach(box => {
+                const img = box.querySelector("img");
+                if (!img) return;
+                box.dataset.originalSrc = img.src;
+                const div = document.createElement("div");
+                div.className = "canvas-bg-replacement";
+                div.style.width = "100%";
+                div.style.height = "100%";
+                div.style.backgroundImage = `url('${img.src}')`;
+                div.style.backgroundSize = "cover";
+                div.style.backgroundPosition = "center";
+                div.style.borderRadius = "8px";
+                img.style.display = "none";
+                box.insertBefore(div, img);
+            });
+        }
+
+        function revertImgsAfterCanvas(board) {
+            board.querySelectorAll(".bild-box").forEach(box => {
+                const replacement = box.querySelector(".canvas-bg-replacement");
+                const img = box.querySelector("img");
+                if (replacement) replacement.remove();
+                if (img) img.style.display = "";
+            });
         }
 
         window.addEventListener("load", versionenRendern);
